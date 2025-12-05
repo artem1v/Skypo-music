@@ -267,4 +267,73 @@
 	box-sizing: border-box;
 	max-height: 170px;
 	height: 100%;
+	& div {
+		cursor: pointer;
+		transition: all 0.2s ease;
+		&:hover {
+			color: #b672ff;
+		}
+	}
+}
+
+.error {
+	color: #fd5151;
+	text-align: center;
+	padding: 20px 0;
+	font-weight: 600;
+}
+
+.noResults {
+	color: #4b4949;
+	text-align: center;
+	padding: 20px 0;
+}
+
+.selected {
+	color: #b672ff;
+	text-decoration: underline;
+	cursor: pointer;
+	transition: color 0.3s;
+	&:hover {
+		color: #ffffff;
+	}
+}
+
+.filter__reset {
+	border: 1px solid #696969;
+	border-radius: 60px;
+	padding: 6px 20px;
+	color: #696969;
+	cursor: pointer;
+	transition: all 0.3s ease;
+
+	&:hover {
+		border-color: #b672ff;
+		color: #b672ff;
+	}
+}
+
+.loadingList {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-top: 10px;
+}
+
+.centerblock__loadingTitle {
+	width: 500px;
+	height: 72px;
+	background: linear-gradient(90deg, #2f2f2f 25%, #3c3c3c 50%, #2f2f2f 75%);
+	background-size: 200% 100%;
+	border-radius: 8px;
+	animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
 }

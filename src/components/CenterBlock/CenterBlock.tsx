@@ -1,100 +1,59 @@
 'use client'
 
-import { data } from '@/data/data'
-import { setTracks } from '@/store/features/trackSlice'
-import { useAppDispatch } from '@/store/store'
 import classNames from 'classnames'
 import { useEffect, useMemo, useState } from 'react'
+import { setTracks } from '../../store/features/trackSlice'
+import { useAppDispatch } from '../../store/store'
+import { Track } from '../../types/track'
+import { LoadingTrackItem } from '../LoadingTrackItem/LoadingTrackItem'
 import { TrackItem } from '../TrackItem/TrackItem'
 import styles from './CenterBlock.module.scss'
+import { FilterPanel } from './FilterPanel/FilterPanel'
+import { SearchBar } from './SearchBar/SearchBar'
 
 type FilterType = 'author' | 'year' | 'genre' | null
 
-type FilterItem = string | { name: string; value: string }
-
-const FilterButton = ({
-	filterName,
-	label,
-	activeFilter,
-	setActiveFilter,
-	items,
-}: {
-	filterName: FilterType
-	label: string
-	activeFilter: FilterType
-	setActiveFilter: (filter: FilterType) => void
-	items: FilterItem[]
-}) => {
-	const isActive = activeFilter === filterName
-
-	return (
-		<div className={styles.filter__button_wrapper}>
-			<div
-				className={classNames(styles.filter__button, {
-					[styles.active]: isActive,
-				})}
-				onClick={() => setActiveFilter(isActive ? null : filterName)}
-			>
-				{label}
-			</div>
-			{isActive && (
-				<div className={styles.filter__list}>
-					<div className={styles.filter__box}>
-						{items.map((item, idx) => {
-							const displayText = typeof item === 'string' ? item : item.name
-
-							return (
-								<div
-									key={`${displayText}-${idx}`}
-									className={styles.filter__list_item}
-								>
-									{displayText}
-								</div>
-							)
-						})}
-					</div>
-				</div>
-			)}
-		</div>
-	)
+type CenterBlockProps = {
+	tracks: Track[]
+	error?: string | null
+	isLoading?: boolean
+	categoryName?: string
+	title: string
 }
 
-export const CenterBlock = () => {
+export const CenterBlock = ({
+	tracks,
+	error,
+	isLoading,
+	title,
+}: CenterBlockProps) => {
 	const [search, setSearch] = useState('')
 	const [debouncedSearch, setDebouncedSearch] = useState('')
 	const [activeFilter, setActiveFilter] = useState<FilterType>(null)
+	const [selectedFilters, setSelectedFilters] = useState({
+		author: null as string | null,
+		genre: null as string | null,
+		year: null as string | null,
+	})
+
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
-		if (data.length > 0) {
-			dispatch(setTracks(data))
-		}
-	}, [dispatch])
+		if (tracks.length > 0) dispatch(setTracks(tracks))
+	}, [dispatch, tracks])
 
 	useEffect(() => {
-		const handler = setTimeout(() => {
-			setDebouncedSearch(search)
-		}, 300)
-
-		return () => {
-			clearTimeout(handler)
-		}
+		const handler = setTimeout(() => setDebouncedSearch(search), 300)
+		return () => clearTimeout(handler)
 	}, [search])
 
-	const filteredTracks = data.filter(
-		track =>
-			track.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-			track.author.toLowerCase().includes(debouncedSearch.toLowerCase()),
-	)
-
 	const uniqueAuthors = useMemo(
-		() => Array.from(new Set(data.map(track => track.author))),
-		[],
+		() => Array.from(new Set(tracks.map(track => track.author))),
+		[tracks],
 	)
-
 	const uniqueGenres = useMemo(
-		() => Array.from(new Set(data.flatMap(track => track.genre))),
-		[],
+		() => Array.from(new Set(tracks.flatMap(track => track.genre))),
+		[tracks],
 	)
 
 	const dateOptions = [
@@ -103,48 +62,63 @@ export const CenterBlock = () => {
 		{ name: 'По умолчанию', value: 'default' },
 	]
 
+	const filteredTracks = useMemo(() => {
+		let result = [...tracks]
+
+		if (debouncedSearch) {
+			const q = debouncedSearch.toLowerCase()
+			result = result.filter(
+				track =>
+					track.name.toLowerCase().includes(q) ||
+					track.author.toLowerCase().includes(q),
+			)
+		}
+		if (selectedFilters.author)
+			result = result.filter(track => track.author === selectedFilters.author)
+		if (selectedFilters.genre)
+			result = result.filter(track =>
+				track.genre.includes(selectedFilters.genre!),
+			)
+		if (selectedFilters.year === 'desc')
+			result.sort((a, b) => b.release_date.localeCompare(a.release_date))
+		else if (selectedFilters.year === 'asc')
+			result.sort((a, b) => a.release_date.localeCompare(b.release_date))
+
+		return result
+	}, [tracks, debouncedSearch, selectedFilters])
+
+	const handleSelect = (filterName: FilterType, value: string) => {
+		if (!filterName) return
+		setSelectedFilters(prev => ({
+			...prev,
+			[filterName]: prev[filterName] === value ? null : value,
+		}))
+	}
+
+	const handleResetFilters = () => {
+		setSelectedFilters({ author: null, genre: null, year: null })
+		setActiveFilter(null)
+		setSearch('')
+		setDebouncedSearch('')
+	}
+
 	return (
 		<div className={styles.centerblock}>
-			<div className={styles.centerblock__search}>
-				<svg className={styles.search__svg}>
-					<use xlinkHref='/Image/icon/sprite.svg#icon-search'></use>
-				</svg>
-				<input
-					className={styles.search__text}
-					type='search'
-					placeholder='Поиск'
-					name='search'
-					value={search}
-					onChange={e => setSearch(e.target.value)}
-				/>
-			</div>
+			<SearchBar search={search} setSearch={setSearch} />
+			<h2 className={styles.centerblock__h2}>
+				{title || <div className={styles.centerblock__loadingTitle}></div>}
+			</h2>
 
-			<h2 className={styles.centerblock__h2}>Треки</h2>
-
-			<div className={styles.centerblock__filter}>
-				<div className={styles.filter__title}>Искать по:</div>
-				<FilterButton
-					filterName='author'
-					label='исполнителю'
-					activeFilter={activeFilter}
-					setActiveFilter={setActiveFilter}
-					items={uniqueAuthors}
-				/>
-				<FilterButton
-					filterName='year'
-					label='году выпуска'
-					activeFilter={activeFilter}
-					setActiveFilter={setActiveFilter}
-					items={dateOptions}
-				/>
-				<FilterButton
-					filterName='genre'
-					label='жанру'
-					activeFilter={activeFilter}
-					setActiveFilter={setActiveFilter}
-					items={uniqueGenres}
-				/>
-			</div>
+			<FilterPanel
+				activeFilter={activeFilter}
+				setActiveFilter={setActiveFilter}
+				selectedFilters={selectedFilters}
+				onSelect={handleSelect}
+				onReset={handleResetFilters}
+				uniqueAuthors={uniqueAuthors}
+				uniqueGenres={uniqueGenres}
+				dateOptions={dateOptions}
+			/>
 
 			<div className={styles.centerblock__content}>
 				<div className={styles.content__title}>
@@ -163,14 +137,26 @@ export const CenterBlock = () => {
 						</svg>
 					</div>
 				</div>
+
 				<div className={styles.content__playlist}>
-					{filteredTracks.length > 0 ? (
-						filteredTracks.map(track => (
-							<TrackItem key={track._id} track={track} />
-						))
-					) : (
-						<div className={styles.noResults}>Ничего не найдено</div>
+					{isLoading && (
+						<div className={styles.loadingList}>
+							{Array.from({ length: 10 }).map((_, i) => (
+								<LoadingTrackItem key={i} />
+							))}
+						</div>
 					)}
+					{error && <div className={styles.error}>{error}</div>}
+
+					{!isLoading && !error && filteredTracks.length > 0
+						? filteredTracks.map(track => (
+								<TrackItem key={track._id} track={track} />
+							))
+						: !isLoading &&
+							!error &&
+							tracks.length > 0 && (
+								<div className={styles.noResults}>Ничего не найдено</div>
+							)}
 				</div>
 			</div>
 		</div>

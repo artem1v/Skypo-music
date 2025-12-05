@@ -5,6 +5,12 @@
 	opacity: 0;
 	transform: translateY(10px);
 	animation: fadeIn 0.3s ease forwards;
+	transition: all 0.2s ease;
+	border-left: 2px solid transparent;
+}
+
+.playlist__item:hover {
+	border-left: 2px solid #b672ff;
 }
 
 @keyframes fadeIn {
@@ -162,6 +168,16 @@
 	margin-right: 17px;
 	fill: transparent;
 	stroke: #696969;
+	transition: all 0.2s ease;
+}
+
+.track__timeSvg.liked {
+	fill: #b672ff;
+	stroke: #696969;
+}
+
+.track__timeSvg.dislike {
+	cursor: not-allowed;
 }
 
 .track__timeText {
