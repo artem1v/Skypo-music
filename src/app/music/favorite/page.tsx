@@ -4,50 +4,48 @@ import { useEffect, useState } from 'react'
 import { CenterBlock } from '../../../components/CenterBlock/CenterBlock'
 import { getFavoriteTracks } from '../../../services/tracks/tracksApi'
 import { setFavoriteTracks } from '../../../store/features/trackSlice'
-import { useAppSelector } from '../../../store/store'
-import { Track } from '../../../types/track'
+import { useAppDispatch, useAppSelector } from '../../../store/store'
 
 export default function FavoritePage() {
-	const { access } = useAppSelector(state => state.auth)
-	const [tracks, setTracks] = useState<Track[]>([])
-	const [isLoading, setIsLoading] = useState(true)
-	const [error, setError] = useState('')
+    const dispatch = useAppDispatch()
+    const { access } = useAppSelector(state => state.auth)
+    const { favoriteTracks, fetchIsLoading, fetchError } = useAppSelector(
+        state => state.tracks,
+    )
 
-	useEffect(() => {
-		const fetchFavorites = async () => {
-			setIsLoading(true)
-			setError('')
+    const [localError, setLocalError] = useState('')
 
-			if (!access) {
-				setError('Чтобы просматривать избранные треки, войдите в аккаунт')
-				setTracks([])
-				setIsLoading(false)
-				return
-			}
+    useEffect(() => {
+        const fetchFavorites = async () => {
+            if (!access) {
+                setLocalError('Чтобы просматривать избранные треки, войдите в аккаунт')
+                dispatch(setFavoriteTracks([]))
+                return
+            }
 
-			try {
-				const data = await getFavoriteTracks(access)
-				if (data.length === 0) {
-					setError('У вас пока нет избранных треков')
-				}
-				setFavoriteTracks(data)
-				setTracks(data)
-			} catch {
-				setError('Ошибка при загрузке избранных треков')
-			} finally {
-				setIsLoading(false)
-			}
-		}
+            try {
+                const data = await getFavoriteTracks(access)
+                if (data.length === 0) {
+                    setLocalError('У вас пока нет избранных треков')
+                }
+                dispatch(setFavoriteTracks(data))
+            } catch {
+                setLocalError('Ошибка при загрузке избранных треков')
+            }
+        }
 
-		fetchFavorites()
-	}, [access])
+        fetchFavorites()
+    }, [access, dispatch])
 
-	return (
-		<CenterBlock
-			tracks={tracks}
-			title='Мои избранные треки'
-			error={error}
-			isLoading={isLoading}
-		/>
-	)
+    const error = localError || fetchError
+    const isLoading = fetchIsLoading
+
+    return (
+        <CenterBlock
+            tracks={favoriteTracks}
+            title='Мои избранные треки'
+            error={error}
+            isLoading={isLoading}
+        />
+    )
 }

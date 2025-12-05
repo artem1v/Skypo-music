@@ -12,6 +12,7 @@ interface MusicTemplateProps {
 	error: string
 	isLoading: boolean
 	categoryName: string
+	title: string
 }
 
 export const MusicTemplate = ({
@@ -19,6 +20,7 @@ export const MusicTemplate = ({
 	error,
 	isLoading,
 	categoryName,
+	title,
 }: MusicTemplateProps) => {
 	return (
 		<div className={styles.wrapper}>
@@ -30,6 +32,7 @@ export const MusicTemplate = ({
 						error={error}
 						isLoading={isLoading}
 						categoryName={categoryName}
+						title={title}
 					/>
 					<Sidebar />
 				</main>
