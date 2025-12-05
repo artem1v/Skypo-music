@@ -72,40 +72,7 @@
 	stroke: #4e4e4e;
 }
 
-.track__circle {
-	display: block;
-	width: 12px;
-	height: 12px;
-	border-radius: 50%;
-	background-color: #ad61ff;
-	animation: pulse 2s infinite ease-in-out;
-}
-
-.track__circleStatic {
-	display: block;
-	width: 12px;
-	height: 12px;
-	border-radius: 50%;
-	background-color: #ad61ff;
-}
-
-@keyframes pulse {
-	0% {
-		transform: scale(0.8);
-		opacity: 0.8;
-	}
-	50% {
-		transform: scale(1.5);
-		opacity: 1;
-	}
-	100% {
-		transform: scale(0.8);
-		opacity: 0.8;
-	}
-}
-
 .track__titleLink {
-	cursor: pointer;
 	font-style: normal;
 	font-weight: 400;
 	font-size: 16px;
@@ -114,7 +81,6 @@
 }
 
 .track__titleSpan {
-	cursor: pointer;
 	font-style: normal;
 	font-weight: 400;
 	font-size: 16px;
@@ -123,7 +89,6 @@
 }
 
 .track__author {
-	cursor: pointer;
 	width: 321px;
 	display: -webkit-box;
 	display: -ms-flexbox;
@@ -147,7 +112,6 @@
 }
 
 .track__albumLink {
-	cursor: pointer;
 	font-style: normal;
 	font-weight: 400;
 	font-size: 16px;
@@ -156,7 +120,6 @@
 }
 
 .track__timeSvg {
-	cursor: pointer;
 	width: 14px;
 	height: 12px;
 	margin-right: 17px;
