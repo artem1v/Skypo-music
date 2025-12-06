@@ -50,14 +50,16 @@ export const removeLike = (access: string, id: number) => {
 
 export const getFavoriteTracks = async (access: string): Promise<Track[]> => {
 	try {
-		const res = await axios.get(`${BASE_API_URL}/catalog/track/favorite/all`, {
-			headers: {
-				Authorization: `Bearer ${access}`,
-			},
-		})
-		return res.data.data || []
-	} catch (err) {
-		console.error('Ошибка при получении избранных треков:', err)
-		throw err
-	}
+        const res = await axios.get(`${BASE_API_URL}/catalog/track/favorite/all`, access
+        ? {
+                headers: {
+                    Authorization: `Bearer ${access}`,
+                },
+            }
+        : {})
+        return res.data.data || []
+    } catch (err) {
+        console.error('Ошибка при получении избранных треков:', err)
+        throw err
+    }
 }
